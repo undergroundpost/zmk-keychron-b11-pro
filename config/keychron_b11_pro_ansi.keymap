@@ -7,8 +7,8 @@
 /*
  * Keychron B11 Pro ANSI, Jarren's keymap. Built from the shield's stock keymap; the only layer changed is
  * layer 0 (Mac base, the Mac side of the Mac/Win switch), which becomes Colemak with home-row mods
- * (timings from the Corne), Backspace on the left spacebar and Delete on the Backspace key. The Win side
- * (layer 3) and all fn layers are stock, so the Win side is a plain QWERTY board.
+ * (timings from the Corne), with the left spacebar holding layer 6 (NAV, the Corne's navigation layer).
+ * The Win side (layer 3) and all fn layers are stock, so the Win side is a plain QWERTY board.
  *
  * Firmware Colemak: the host must use a plain US layout (on Android: physical keyboard -> English (US)).
  *
@@ -226,15 +226,15 @@
     keymap {
         compatible = "zmk,keymap";
         /* 0: Mac base (the Mac/Win switch, A26, holds layer 3 for Windows) */
-        /* Colemak with home-row mods; left spacebar = Backspace, Backspace key = Delete */
+        /* Colemak with home-row mods; left spacebar = hold NAV (layer 6) */
         mac_base_layer {
             label = "colemak";
             bindings = <
-            &kp ESC    &kp N1         &kp N2        &kp N3        &kp N4         &kp N5     &kp N6     &kp N7         &kp N8        &kp N9        &kp N0          &kp MINUS  &kp EQUAL  &kp DEL
+            &kp ESC    &kp N1         &kp N2        &kp N3        &kp N4         &kp N5     &kp N6     &kp N7         &kp N8        &kp N9        &kp N0          &kp MINUS  &kp EQUAL  &kp BSPC
             &kp TAB    &kp Q          &kp W         &kp F         &kp P          &kp G      &kp J      &kp L          &kp U         &kp Y         &kp SEMI        &kp LBKT   &kp RBKT   &kp BSLH
             &kp CAPS   &hm_o LCTRL A  &hm_r LALT R  &hm_m LGUI S  &hm_i LSHFT T  &kp D      &kp H      &hm_i RSHFT N  &hm_m RGUI E  &hm_r LALT I  &hm_o RCTRL O   &kp SQT    &kp RET
             &kp LSHFT  &kp Z          &kp X         &kp C         &kp V          &kp B      &kp K      &kp M          &kp COMMA     &kp DOT       &kp FSLH        &kp RSHFT  &kp UP
-            &kp LCTRL  &mo 1          &uc LALT      &uc LGUI      &kp BSPC       &kp SPACE  &uc RGUI   &mo 2          &kp LEFT      &kp DOWN      &kp RIGHT
+            &kp LCTRL  &mo 1          &uc LALT      &uc LGUI      &mo 6          &kp SPACE  &uc RGUI   &mo 2          &kp LEFT      &kp DOWN      &kp RIGHT
             &mo 3      &kc SEL_USB  &kc SEL_PPT  &kc SEL_BLE  &kc BATCHG
             >;
         };
@@ -301,6 +301,22 @@
             &trans         &trans          &trans          &trans          &trans           &kc BATINFO      &trans     &trans      &trans    &trans      &trans      &uc LG(DOT)   &kp PG_UP
             &trans         &trans          &uc 0xf000      &trans          &trans           &trans           &kp RCTRL  &trans      &kp HOME  &kp PG_DN   &kp END
             &none          &trans          &trans          &trans          &trans
+            >;
+        };
+
+        /* 6: NAV, held by the left spacebar on the Colemak side. The Corne's NAVIGATION layer: Esc,
+         * Super+Shift+Tab, Up, Super+Tab, PrtSc on q w f p g; Home, arrows, End on a r s t d; Delete on h;
+         * plain Shift, Super, Alt, Ctrl on n e i o for Shift/Ctrl+arrow selection. Checked against the
+         * diode-less matrix: holding the spacebar, mods and an arrow never forms a ghost rectangle. */
+        nav_layer {
+            label = "nav";
+            bindings = <
+            &trans  &trans    &trans           &trans    &trans       &trans     &trans   &trans     &trans    &trans    &trans     &trans  &trans  &trans
+            &trans  &kp ESC   &kp LS(LG(TAB))  &kp UP    &kp LG(TAB)  &kp PSCRN  &trans   &trans     &trans    &trans    &trans     &trans  &trans  &trans
+            &trans  &kp HOME  &kp LEFT         &kp DOWN  &kp RIGHT    &kp END    &kp DEL  &kp LSHFT  &kp LGUI  &kp LALT  &kp LCTRL  &trans  &trans
+            &trans  &trans    &trans           &trans    &trans       &trans     &trans   &trans     &trans    &trans    &trans     &trans  &trans
+            &trans  &trans    &trans           &trans    &trans       &trans     &trans   &trans     &trans    &trans    &trans
+            &none   &trans    &trans           &trans    &trans
             >;
         };
     };
