@@ -1,0 +1,65 @@
+name: B11 Pro firmware
+on:
+  push:
+    branches: [jarren]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      # same image as Keychron's own zmk_build.yml for the rtl8762g branch
+      image: ghcr.io/zephyrproject-rtos/ci:v0.26.11
+      options: "--entrypoint /bin/bash"
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: stock   # the shield's stock keymap: proves the base build boots
+            config: ""
+          - name: jarren  # config/keychron_b11_pro_ansi.keymap
+            config: "config"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: zmk
+          persist-credentials: false
+
+      - name: Set up Zephyr SDK
+        run: /opt/toolchains/zephyr-sdk-${ZSDK_VERSION}/setup.sh -c
+
+      - name: Cache west modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            zmk/zephyr
+            zmk/modules
+            zmk/tools
+          key: west-${{ hashFiles('zmk/app/west.yml') }}
+
+      - name: West update
+        shell: bash
+        run: |
+          git config --global --add safe.directory '*'
+          cd zmk
+          west init -l app
+          west update
+
+      - name: Build
+        shell: bash
+        run: |
+          cd zmk/app
+          extra=()
+          if [ -n "${{ matrix.config }}" ]; then
+            extra=(-DZMK_CONFIG="$GITHUB_WORKSPACE/zmk/${{ matrix.config }}")
+          fi
+          # the post-build step needs the default build dir (app/build): it adds the OTA header to zmk.bin in place
+          west build -p -b keychron -- -DSHIELD=keychron_b11_pro_ansi "${extra[@]}" 2>&1 | tee build.log
+          grep "Using keymap file" build.log
+          ls -l build/zephyr/zmk.bin
+          sha256sum build/zephyr/zmk.bin
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: b11-${{ matrix.name }}
+          path: zmk/app/build/zephyr/zmk.bin
